@@ -1,0 +1,26 @@
+{
+    "name": "xiaodi/think-mysqldump",
+    "type": "library",
+    "license": "MIT",
+    "keywords": [
+        "php",
+        "thinkphp"
+    ],
+    "description": "ThinkPHP Mysqldump Component",
+    "minimum-stability": "dev",
+    "authors": [
+        {
+            "name": "xiaodi",
+            "email": "liangjinbiao@live.com"
+        }
+    ],
+    "require": {
+        "php": ">=7.1.0",
+        "topthink/framework": "^6.0.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "xiaodi\\Mysqldump\\": "src/"
+        }
+    }
+}
