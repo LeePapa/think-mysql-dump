@@ -10,10 +10,10 @@ composer require xiaodi/think-mysqldump:dev-master
 ```php
 use xiaodi\Mysqldump\Facade\Mysqldump;
 
-// 默认导出所有表
+// 默认导出所有表（含表结构与内容）
 Mysqldump::connect()->start();
 
-// 单独导出某个表
+// 单独导出某个表（含表结构与内容）
 Mysqldump::connect()->table('xxx')->start();
 
 // 不需要表内容，只导出表结构
