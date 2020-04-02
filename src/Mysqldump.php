@@ -235,7 +235,7 @@ EOF;
      *
      * @return void
      */
-    public function start(string $fileName = '')
+    public function start()
     {
         $this->handleHeader();
 
