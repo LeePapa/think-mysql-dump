@@ -191,13 +191,12 @@ EOF;
     /**
      * 保存文件
      *
+     * @param string $fileName
      * @return void
      */
-    protected function saveFile()
+    protected function saveFile(string $fileName)
     {
-        $fileName = 'backup.sql';
-
-        $fp = @fopen($fileName, 'w+');
+        $fp = @fopen($fileName . '.sql', 'w+');
         @fwrite($fp, $this->dom);
         @fclose($fp);
     }
@@ -236,14 +235,16 @@ EOF;
      *
      * @return void
      */
-    public function start()
+    public function start(string $fileName = '')
     {
         $this->handleHeader();
 
         if ($this->table) {
             $tables = [$this->table];
+            $fileName = $this->table;
         } else {
             $tables = $this->getTable();
+            $fileName = $this->database;
         }
 
         foreach ($tables as $table) {
@@ -251,6 +252,6 @@ EOF;
             $this->dom .= "\n\n";
         }
 
-        $this->saveFile();
+        $this->saveFile($fileName);
     }
 }
