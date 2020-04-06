@@ -4,9 +4,14 @@ namespace xiaodi\Mysqldump;
 
 class Mysqldump
 {
-    protected $table;
 
-    protected $database;
+    private $username;
+    private $password;
+    private $hostname = '127.0.0.1';
+    private $hostport = 3306;
+    private $database;
+
+    protected $inlucdeTables = [];
 
     protected $conn;
 
@@ -16,35 +21,41 @@ class Mysqldump
 
     protected $includeTableStructure = true;
 
-    protected $inlucdeTableContent = true;
+    protected $includeTableContent = true;
 
 
-    public function connect($hostname = null, $database = null, $username = null, $password = null, $hostport = 3306)
+    /**
+     * 链接数据库
+     * 
+     * @return void
+     */
+    protected function connect()
     {
-        $hostname = $hostname ?: env('database.hostname');
-        $username = $username ?: env('database.username');
-        $password = $password ?: env('database.password');
-        $hostport = $hostport ?: env('database.hostport');
-        $this->database = $database ?: env('database.database');
+        $this->conn = new \mysqli($this->hostname, $this->username, $this->password, $this->database, $this->hostport);
+    }
 
-        try {
-            $this->conn = new \mysqli($hostname, $username, $password, $this->database, (int) $hostport);
-        } catch (\Exception $e) {
-            throw new \Exception('连接数据库失败');
-        }
+    /**
+     * 数据库用户名
+     * 
+     * @param string $username
+     * @return self
+     */
+    public function username(string $username):self
+    {
+        $this->username = $username;
 
         return $this;
     }
 
     /**
-     * 导出数据表
-     *
-     * @param string $name
-     * @return $this
+     * 数据库密码
+     * 
+     * @param string $password
+     * @return self
      */
-    public function table(string $name): self
+    public function password(string $password):self
     {
-        $this->table = $name;
+        $this->password = $password;
 
         return $this;
     }
@@ -53,11 +64,28 @@ class Mysqldump
      * 导出整个数据库
      *
      * @param string $name
-     * @return void
+     * @return self
      */
     public function database(string $name): self
     {
         $this->database = $name;
+
+        return $this;
+    }
+
+    /**
+     * 导出数据表
+     *
+     * @param string|array $name
+     * @return $this
+     */
+    public function table($name): self
+    {
+        if (is_array($name)) {
+            $this->inlucdeTables = $name;
+        } else {
+            $this->inlucdeTables[] = $name;
+        }
 
         return $this;
     }
@@ -141,7 +169,7 @@ class Mysqldump
         if ($this->includeTableContent) {
             $this->dom .= "INSERT INTO `{$table}` (";
 
-            $r = $this->conn->query("SELECT column_name as column_name FROM information_schema.columns WHERE table_name='db_log';");
+            $r = $this->conn->query("SELECT column_name as column_name FROM information_schema.columns WHERE table_name='{$table}';");
 
             $fields = [];
             while ($row = mysqli_fetch_row($r)) {
@@ -237,11 +265,13 @@ EOF;
      */
     public function start()
     {
+        $this->connect();
+
         $this->handleHeader();
 
-        if ($this->table) {
-            $tables = [$this->table];
-            $fileName = $this->table;
+        if (!empty($this->inlucdeTables)) {
+            $tables = $this->inlucdeTables;
+            $fileName = $this->database . '-tables';
         } else {
             $tables = $this->getTable();
             $fileName = $this->database;
